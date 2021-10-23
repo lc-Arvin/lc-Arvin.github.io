@@ -15,7 +15,7 @@ categories: docs
 
 <figure>
     <div align=center>
-    <img src="{{site.url}}/images/2021-09-19-hp01.png" weight=200 height=300 />
+    <img src="{{site.url}}/images/2021-09-20-01/2021-09-19-hp01.png" weight=200 height=300 />
     </div>
 </figure>
 
@@ -29,7 +29,7 @@ categories: docs
 
 <figure>
     <div align=center>
-    <img src="{{site.url}}/images/2021-09-19-hp02.png" weight=200 height=300 />
+    <img src="{{site.url}}/images/2021-09-20-01/2021-09-19-hp02.png" weight=200 height=300 />
     </div>
 </figure>
 
@@ -47,3 +47,7 @@ categories: docs
 ### 总结
 
 性能优化可以系统化的开展。了解优化对象的系统组成，能够帮助我们全面地分析问题；基于测量的结果进行优化，能够帮助我们有的放矢，关注真正的瓶颈；有许多的方法与工具支撑性能优化工作。对于项目而言，性能监控可以纳入工程建设中，让性能优化工作向着最佳性能不断收敛。
+
+### 相关主题
+SPE, software performance engineering. 
+[one introduction to the history](https://dzone.com/articles/a-short-history-of-performance-engineering)
