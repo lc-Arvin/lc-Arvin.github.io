@@ -1,0 +1,66 @@
+---
+layout: post
+title:  "02 了解你的CPU"
+date:   2021-09-21 14:00:00 +0800
+categories: docs
+---
+
+互联网工程师大多数工作在应用层，对底层的硬件甚至开发框架不一定需要很多的了解。但更多的底层知识，能够更好地帮助我们理解整个系统是如何工作的。这篇博客主要整理了一些CPU相关的资料。CPU的制造商有多家，比如Intel/AMD/Arm厂商等，本文多以Intel系列CPU为例。
+
+## 1. CPU 硬件印象
+
+### 1.1. 外观
+先来一张图(图片来自英特尔，版权属于图片来源)。CPU在消费者的眼里，往往就是一个小方块，可能不超过5cm*5cm。
+<figure>
+    <div align=center>
+    <img src="{{site.url}}/images/2021-09-21-02/cpu_01.jpg" weight=200 height=300 />
+    </div>
+</figure>
+
+### 1.2. 重要参数
+
+同样来自英特尔的一份[说明](https://www.intel.cn/content/www/cn/zh/products/sku/205683/intel-xeon-platinum-8376hl-processor-38-5m-cache-2-60-ghz/specifications.html)。这些参数是属于厂商的骄傲。CPU的内核数、线程数、频率、寄存器种类和数量、缓存大小等，都说明了其性能。特别的，其中有两栏，讲的是"先进技术"和"安全性与可靠性"。如果你是做人工智能领域的，那么你可能会对"英特尔® 深度学习提升"这一项感兴趣；如果你是做存储的，那么你可能希望再了解下"支持英特尔® 傲腾™ 内存"以及对于的非易失内存技术；如果你关心数据包加解密，那么你大概已经听说过AES-NI，也就是"英特尔® AES 新指令"。CPU层面提供的这些先进技术，支撑了上层软件大量的优化特性。关于更多的相关技术的Overview可以参见Intel社区[相关文章](https://software.intel.com/content/www/us/en/develop/articles/intel-xeon-processor-scalable-family-technical-overview.html)。
+
+<figure>
+    <div align=center>
+    <img src="{{site.url}}/images/2021-09-21-02/cpu_02.png" weight=100 height=200 />
+    </div>
+</figure>
+
+## 2. CPU基本工作原理
+CPU工作原理和计算机理论相关。在冯诺依曼体系结构下，程序和数据统一存储，指令和数据需要从同一存储空间存取，经由同一总线传输，无法重叠执行。
+
+<figure>
+    <div align=center>
+    <img src="{{site.url}}/images/2021-09-21-02/Von_Neumann_Architecture.svg.png" weight=100 height=200 />
+    </div>
+</figure>
+
+根据冯诺依曼体系，CPU的工作分为以下5个阶段：取指令阶段、指令译码阶段、执行指令阶段、访存取数和结果写回。
+    - 取指令（IF，instruction fetch），即将一条指令从主存储器中取到指令寄存器的过程。
+    - 指令译码阶段（ID，instruction decode），对取回的指令进行拆分和解释，识别区分出不同的指令类 别以及各种获取操作数的方法。
+    - 执行指令阶段（EX，execute），具体实现指令的功能。
+    - 访存取数阶段（MEM，memory），根据指令需要访问主存、读取操作数，CPU得到操作数在主存中的地址，并从主存中读取该操作数用于运算。部分指令不需要访问主存，则可以跳过该阶段。
+    - 结果写回阶段（WB，write back），作为最后一个阶段，结果写回阶段把执行指令阶段的运行结果数据"写回"到某种存储形式。
+
+## 3. CPU的性能优化
+CPU一直在从架构、工艺各方面不断演进。作为上层软件工程师，个人比较比较关注的是和软件编程相关的一些点，包括流水线、缓存、加速指令、多核并行等。
+### 3.1. 流水线
+### 3.2. CPU、缓存、内存
+### 3.3. 加速指令
+### 3.4. 多核NUMA
+
+## 4. 软件工程师使用CPU的方式
+CPU安装在电路板上，配合内存、磁盘、网卡等其他硬件，再配套BIOS/UEFI、操作系统等软件，构成基本的计算机系统。对于软件工程师而言，我们使用CPU的方式可以简单归为两种：
+### 4.1 通过操作系统
+大多数时间，我们并不直接和CPU打交道，而是通过操作系统与CPU交互。比如通过操作做各类通用计算任务。比如读写一个文件，通过操作系统提供的文件接口实现文件的加载、编辑、写回。
+### 4.2 通过直接使用CPU指令
+作为软件工程师，我们也可以使用很多CPU提供的指令集。比如Intel系列CPU提供了AES-NI系列指令集，openssl库直接对其封装使用，这就是直接使用了CPU提供的能力。
+
+## 参考资料
+1. Intel Software Developer's Manual: https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html
+2. AES-NI White Paper: https://www.intel.com/content/www/us/en/developer/articles/tool/intel-advanced-encryption-standard-aes-instructions-set.html
+
+
+
+
