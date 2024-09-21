@@ -1,9 +1,15 @@
 # Llamacpp量化方法走读
 
 ## Llamacpp简介
-Llamacpp以量化方法著名。
+Llamacpp以可以不使用GPU执行大模型推理著名。其关键技术手段之一就是量化。
 
 ## 量化方法分类
+```
+参考：https://www.reddit.com/r/LocalLLaMA/comments/1ba55rj/overview_of_gguf_quantization_methods/?rdt=53849
+```
+- Legacy quants (Q4_0, Q4_1, Q8_0, ...)
+- K-quants (Q3_K_S, Q5_K_M, ...)，PR #1684;
+- I-quants (IQ2_XXS, IQ3_S, ...)，PR #4773;
 
 
 ## 实例分析1: 对称量化 quantize_row_q4_0_reference
