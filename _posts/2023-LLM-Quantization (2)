@@ -135,4 +135,12 @@ void dequantize_row_q4_1(const block_q4_1 * restrict x, float * restrict y, int6
 ```
 
 ## 实例分析3: TODO.
+K-Quants
 
+参考：https://github.com/ggerganov/llama.cpp/pull/1684
+
+
+## 感觉少了calibration相关的量化算法
+参考：
+1、信息熵：https://www.cnblogs.com/liaohuiqiang/p/7673681.html
+2、int8量化介绍：https://zhuanlan.zhihu.com/p/58182172
