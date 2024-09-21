@@ -1,0 +1,138 @@
+# Llamacpp量化方法走读
+
+## Llamacpp简介
+Llamacpp以量化方法著名。
+
+## 量化方法分类
+
+
+## 实例分析1: 对称量化 quantize_row_q4_0_reference
+
+见注释部分。
+```c  quant
+void quantize_row_q4_0_reference(const float * restrict x, block_q4_0 * restrict y, int64_t k) {
+    static const int qk = QK4_0;
+
+    assert(k % qk == 0);
+
+    const int nb = k / qk;                          // 分块
+
+    for (int i = 0; i < nb; i++) {
+        float amax = 0.0f; // absolute max
+        float max  = 0.0f;
+
+        for (int j = 0; j < qk; j++) {
+            const float v = x[i*qk + j];
+            if (amax < fabsf(v)) {
+                amax = fabsf(v);
+                max  = v;                           // 取Max
+            }
+        }
+
+        const float d  = max / -8;                  // 算系数
+        const float id = d ? 1.0f/d : 0.0f;
+
+        y[i].d = GGML_FP32_TO_FP16(d);              // 保存系数
+
+        for (int j = 0; j < qk/2; ++j) {
+            const float x0 = x[i*qk + 0    + j]*id;   //执行转换
+            const float x1 = x[i*qk + qk/2 + j]*id;
+
+            const uint8_t xi0 = MIN(15, (int8_t)(x0 + 8.5f));  // 保存。 x0+8.5是做到了偏移+四舍五入
+            const uint8_t xi1 = MIN(15, (int8_t)(x1 + 8.5f));
+
+            y[i].qs[j]  = xi0;                      // 低4bit保存。
+            y[i].qs[j] |= xi1 << 4;                 // 高4bit保存
+        }
+    }
+}
+```
+
+```c  dequant
+void dequantize_row_q4_0(const block_q4_0 * restrict x, float * restrict y, int64_t k) {
+    static const int qk = QK4_0;
+
+    assert(k % qk == 0);
+
+    const int nb = k / qk;                          // 分块
+
+    for (int i = 0; i < nb; i++) {                  
+        const float d = GGML_FP16_TO_FP32(x[i].d);  
+
+        for (int j = 0; j < qk/2; ++j) {
+            const int x0 = (x[i].qs[j] & 0x0F) - 8;  // 高低4位分别取值，还原
+            const int x1 = (x[i].qs[j] >>   4) - 8;
+
+            y[i*qk + j + 0   ] = x0*d;               // scaling还原
+            y[i*qk + j + qk/2] = x1*d;
+        }
+    }
+}
+```
+
+## 实例分析2: 非对称量化 quantize_row_q4_1_reference
+见注释部分。
+```c  quant
+void quantize_row_q4_1_reference(const float * restrict x, block_q4_1 * restrict y, int64_t k) {
+    const int qk = QK4_1;
+
+    assert(k % qk == 0);
+
+    const int nb = k / qk;                           // 分块
+
+    for (int i = 0; i < nb; i++) {
+        float min = FLT_MAX;
+        float max = -FLT_MAX;
+
+        for (int j = 0; j < qk; j++) {
+            const float v = x[i*qk + j];
+
+            if (v < min) min = v;
+            if (v > max) max = v;                   // min-max 
+        }
+
+        const float d  = (max - min) / ((1 << 4) - 1);   // 量化系数, 先用float32计算
+        const float id = d ? 1.0f/d : 0.0f;
+
+        y[i].d = GGML_FP32_TO_FP16(d);            
+        y[i].m = GGML_FP32_TO_FP16(min);                 // 保存了min.  r = q*s +min, 或者说 q = (r-min)/s
+
+        for (int j = 0; j < qk/2; ++j) {
+            const float x0 = (x[i*qk + 0    + j] - min)*id;       //q = (r-min)/s
+            const float x1 = (x[i*qk + qk/2 + j] - min)*id;
+
+            const uint8_t xi0 = MIN(15, (int8_t)(x0 + 0.5f));     // 化整，四舍五入 
+            const uint8_t xi1 = MIN(15, (int8_t)(x1 + 0.5f));
+
+            y[i].qs[j]  = xi0;                                    // 保存
+            y[i].qs[j] |= xi1 << 4;
+        }
+    }
+}
+```
+
+```c  dequant
+void dequantize_row_q4_1(const block_q4_1 * restrict x, float * restrict y, int64_t k) {
+    static const int qk = QK4_1;
+
+    assert(k % qk == 0);
+
+    const int nb = k / qk;
+
+    for (int i = 0; i < nb; i++) {
+        const float d = GGML_FP16_TO_FP32(x[i].d);     // 计算前转到FP32
+        const float m = GGML_FP16_TO_FP32(x[i].m);   
+
+        for (int j = 0; j < qk/2; ++j) {
+            const int x0 = (x[i].qs[j] & 0x0F);        // 取数据
+            const int x1 = (x[i].qs[j] >>   4);
+
+            y[i*qk + j + 0   ] = x0*d + m;             // 还原，r = q * s + min
+            y[i*qk + j + qk/2] = x1*d + m;
+        }
+    }
+}
+```
+
+## 实例分析3: TODO.
+
