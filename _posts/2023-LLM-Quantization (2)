@@ -11,7 +11,6 @@ Llamacpp以可以不使用GPU执行大模型推理著名。其关键技术手段
 - K-quants (Q3_K_S, Q5_K_M, ...)，PR #1684;
 - I-quants (IQ2_XXS, IQ3_S, ...)，PR #4773;
 
-
 ## 实例分析1: 对称量化 quantize_row_q4_0_reference
 
 见注释部分。
@@ -150,3 +149,10 @@ K-Quants
 参考：
 1、信息熵：https://www.cnblogs.com/liaohuiqiang/p/7673681.html
 2、int8量化介绍：https://zhuanlan.zhihu.com/p/58182172
+
+
+## Reference
+- llamacpp 和量化相关issue：
+    - https://github.com/ggerganov/llama.cpp/issues/1240
+    - https://github.com/ggerganov/llama.cpp/discussions/5063
+    - https://github.com/users/ggerganov/projects/6/views/1?filterQuery=quan
