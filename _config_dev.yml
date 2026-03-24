@@ -1,0 +1,8 @@
+# Development configuration override
+# Use with: bundle exec jekyll serve --config _config.yml,_config_dev.yml
+
+# Override URL for local development
+url: "http://localhost:4000"
+
+# Livereload can be enabled with --livereload flag
+# livereload: true
